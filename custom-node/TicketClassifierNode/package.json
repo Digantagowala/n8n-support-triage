@@ -1,0 +1,14 @@
+{
+  "name": "n8n-nodes-ticket-classifier",
+  "version": "1.0.0",
+  "description": "Custom n8n node to classify support tickets",
+  "main": "dist/index.js",
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "nodes": ["dist/TicketClassifierNode.node.js"]
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  }
+}

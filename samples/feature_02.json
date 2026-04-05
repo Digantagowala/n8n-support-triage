@@ -1,0 +1,8 @@
+{
+  "ticketId": "TCK_1006",
+  "name": "Frank Miller",
+  "email": "frank@example.com",
+  "subject": "Suggestion for export feature",
+  "message": "I suggest adding a CSV export enhancement to the reports section.",
+  "source": "email"
+}

@@ -1,0 +1,8 @@
+{
+  "ticketId": "TCK_1002",
+  "name": "Bob Smith",
+  "email": "bob@example.com",
+  "subject": "Billing issue with subscription",
+  "message": "My payment failed but I was still charged twice.",
+  "source": "email"
+}

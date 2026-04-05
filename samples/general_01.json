@@ -1,0 +1,8 @@
+{
+  "ticketId": "TCK_1007",
+  "name": "Grace Hall",
+  "email": "grace@example.com",
+  "subject": "General inquiry",
+  "message": "Hi, I just wanted to ask about your business hours and support coverage.",
+  "source": "chat"
+}

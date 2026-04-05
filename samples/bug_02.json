@@ -1,0 +1,8 @@
+{
+  "ticketId": "TCK_1004",
+  "name": "David Lee",
+  "email": "david@example.com",
+  "subject": "Dashboard broken",
+  "message": "The dashboard is broken and not loading any data. Completely down.",
+  "source": "website"
+}

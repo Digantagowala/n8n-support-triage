@@ -1,0 +1,857 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-ticket",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        -64
+      ],
+      "id": "71ccb261-53d3-4c90-84c7-aed787575898",
+      "name": "Webhook",
+      "webhookId": "bf7141d8-531a-4b86-ac3f-81fe117f4ecb"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\n\nconst required = ['ticketId', 'name', 'email', 'subject', 'message', 'source'];\nfor (const field of required) {\n  if (!body[field] || body[field].trim() === '') {\n    return [{\n      json: {\n        accepted: false,\n        error: `Ye field missing ya empty hai: ${field}`\n      }\n    }];\n  }\n}\n\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nif (!emailRegex.test(body.email)) {\n  return [{\n    json: {\n      accepted: false,\n      error: 'Email format galat hai'\n    }\n  }];\n}\n\nreturn [{ json: body }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        -64
+      ],
+      "id": "6db16472-d980-431e-9fa5-96fce054d96f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "acf45c2a-6d84-4670-a84e-71e5b560a357",
+              "leftValue": "{{ $json.accepted }",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        -64
+      ],
+      "id": "d66d3a3b-5098-40c4-9bd1-2a9785aca107",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        224,
+        160
+      ],
+      "id": "15295419-33e4-40e3-8009-072a520fa71f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1dk-cYEzHoxkDHtEv_-9SKvky_ALb1dDrdDdblzmzwPo",
+          "mode": "list",
+          "cachedResultName": "Support Tickets",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dk-cYEzHoxkDHtEv_-9SKvky_ALb1dDrdDdblzmzwPo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dk-cYEzHoxkDHtEv_-9SKvky_ALb1dDrdDdblzmzwPo/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "ticketId ",
+              "lookupValue": "={{ $json.ticketId }}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        -160
+      ],
+      "id": "1839ed4e-9867-4c29-8cd3-2ec756b2a2b3",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e2w3cD36lql4RLbZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4cc48e8d-55cc-4b9a-a2f6-e6ce6948a1e3",
+              "leftValue": "={{ $json.row_number }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        688,
+        -160
+      ],
+      "id": "f37fe981-7de4-4544-bfe6-1c466a60cde9",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"accepted\": true, \"ticketId\": \"{{ $('Code in JavaScript').item.json.ticketId }}\", \"status\": \"duplicate_ignored\" }",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1008,
+        -176
+      ],
+      "id": "69d00320-2928-47d7-906a-b6c791c90f8e",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "subject": "={{ $('Code in JavaScript').item.json.subject }}",
+        "message": "={{ $('Code in JavaScript').item.json.message }}",
+        "source": "={{ $('Code in JavaScript').item.json.source }}"
+      },
+      "type": "CUSTOM.ticketClassifierNode",
+      "typeVersion": 1,
+      "position": [
+        976,
+        112
+      ],
+      "id": "71e5e282-fc1d-437f-b680-5623256f845e",
+      "name": "Ticket Classifier"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "029289ff-9aab-444f-a6ed-726a0bb29304",
+              "name": "ticketId",
+              "value": "={{ $('Code in JavaScript').item.json.ticketId }}",
+              "type": "string"
+            },
+            {
+              "id": "bbf076d6-c383-4fe4-8c78-a91b73398ec9",
+              "name": "name",
+              "value": "={{ $('Code in JavaScript').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "9bac35d2-6f5d-4440-8245-ed07ad672e5e",
+              "name": "email",
+              "value": "={{ $('Code in JavaScript').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "50d079e9-15ef-4932-8b08-652d6966f773",
+              "name": "subject",
+              "value": "={{ $('Code in JavaScript').item.json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "ec7f74d1-39aa-4175-a132-5ae2e0b8d961",
+              "name": "message",
+              "value": "={{ $('Code in JavaScript').item.json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "89dafeaa-0da3-43eb-bf31-4fd5dd8e6c2a",
+              "name": "source",
+              "value": "={{ $('Code in JavaScript').item.json.source }}",
+              "type": "string"
+            },
+            {
+              "id": "dceeb2b5-32ab-4ea0-af23-20526b1b889b",
+              "name": "category",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "326cd79c-3dd6-4dc6-891c-7ddaa6bfb362",
+              "name": "priority",
+              "value": "={{ $json.priority }}",
+              "type": "string"
+            },
+            {
+              "id": "f4cf765d-c76c-407c-b300-985ebe77a129",
+              "name": "reason",
+              "value": "={{ $json.reason }}",
+              "type": "string"
+            },
+            {
+              "id": "7ac465ae-87b5-4993-91a5-ccf93e090d11",
+              "name": "createdAt",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "d76d68a3-ebd0-4b14-a815-836f0946a604",
+              "name": "status",
+              "value": "processed",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1184,
+        112
+      ],
+      "id": "542b734e-541f-4a7e-a451-3ca1645b6041",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "billing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "aa884272-e181-41ce-8435-8e005a571e95"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c96b0047-911d-41fd-b6c1-0e00cdbf18d5",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "bug",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8314a08c-8744-4f52-abd7-79d3e155e13c",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "feature_request",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bbd4b629-6322-449d-a473-2d8b814d0c55",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "general",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        112
+      ],
+      "id": "ade2c34f-6fd9-44f5-8c2f-60903c65fe29",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "#urgent-support"
+        },
+        "text": "=🎫 New Ticket [{{ $json.ticketId }}]\n👤 {{ $json.name }} ({{ $json.email }})\n📌 Category: {{ $json.category }} | Priority: {{ $json.priority }}\n📝 {{ $json.subject }}\n💬 {{ $json.message }}\n🔍 Reason: {{ $json.reason }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1872,
+        -256
+      ],
+      "id": "f2d53f47-56f7-4bb4-a3f8-3f8fb601934c",
+      "name": "Send a message",
+      "webhookId": "cc2a2a00-4578-4e66-b5ca-ba1120ebd49b",
+      "credentials": {
+        "slackApi": {
+          "id": "GiYWSjEJtTIiISuL",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "=#bug-reports",
+          "mode": ""
+        },
+        "text": "=🎫 New Ticket [{{ $json.ticketId }}]\n👤 {{ $json.name }} ({{ $json.email }})\n📌 Category: {{ $json.category }} | Priority: {{ $json.priority }}\n📝 {{ $json.subject }}\n💬 {{ $json.message }}\n🔍 Reason: {{ $json.reason }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1856,
+        -48
+      ],
+      "id": "556251c9-ef93-4fd0-8f0f-235420468486",
+      "name": "Send a message1",
+      "webhookId": "8164f403-1b0b-4f2a-b938-5d830c3cc2fe",
+      "credentials": {
+        "slackApi": {
+          "id": "GiYWSjEJtTIiISuL",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "=#feature-requests",
+          "mode": ""
+        },
+        "text": "=🎫 New Ticket [{{ $json.ticketId }}]\n👤 {{ $json.name }} ({{ $json.email }})\n📌 Category: {{ $json.category }} | Priority: {{ $json.priority }}\n📝 {{ $json.subject }}\n💬 {{ $json.message }}\n🔍 Reason: {{ $json.reason }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1888,
+        144
+      ],
+      "id": "751fd5e7-a801-4996-ab0e-a9472ef39071",
+      "name": "Send a message2",
+      "webhookId": "89d24e47-f680-4ac5-8bbf-622c2aa2f9e4",
+      "credentials": {
+        "slackApi": {
+          "id": "GiYWSjEJtTIiISuL",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "=#general-support",
+          "mode": ""
+        },
+        "text": "=🎫 New Ticket [{{ $json.ticketId }}]\n👤 {{ $json.name }} ({{ $json.email }})\n📌 Category: {{ $json.category }} | Priority: {{ $json.priority }}\n📝 {{ $json.subject }}\n💬 {{ $json.message }}\n🔍 Reason: {{ $json.reason }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1600,
+        320
+      ],
+      "id": "66b46068-e6dd-45de-9991-e7aeb8e3f6d4",
+      "name": "Send a message3",
+      "webhookId": "3ee42112-c55b-4b8c-bc6c-64a1667c2ccd",
+      "credentials": {
+        "slackApi": {
+          "id": "GiYWSjEJtTIiISuL",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dk-cYEzHoxkDHtEv_-9SKvky_ALb1dDrdDdblzmzwPo",
+          "mode": "list",
+          "cachedResultName": "Support Tickets",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dk-cYEzHoxkDHtEv_-9SKvky_ALb1dDrdDdblzmzwPo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dk-cYEzHoxkDHtEv_-9SKvky_ALb1dDrdDdblzmzwPo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ticketId ": "={{ $('Edit Fields').item.json.ticketId }}",
+            "name": "={{ $('Edit Fields').item.json.name }}",
+            "email": "={{ $('Edit Fields').item.json.email }}",
+            "subject": "={{ $('Edit Fields').item.json.subject }}",
+            "message": "={{ $('Edit Fields').item.json.message }}",
+            "source": "={{ $('Edit Fields').item.json.source }}",
+            "category": "={{ $('Edit Fields').item.json.category }}",
+            "priority": "={{ $('Edit Fields').item.json.priority }}",
+            "reason": "={{ $('Edit Fields').item.json.reason }}",
+            "createdAt": "={{ $('Edit Fields').item.json.createdAt }}",
+            "status": "={{ $('Edit Fields').item.json.status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ticketId ",
+              "displayName": "ticketId ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "subject",
+              "displayName": "subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "priority",
+              "displayName": "priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "reason",
+              "displayName": "reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "createdAt",
+              "displayName": "createdAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2448,
+        240
+      ],
+      "id": "d214f60f-ddd2-4ff8-9618-3df264d16392",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e2w3cD36lql4RLbZ",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"accepted\": true, \"ticketId\": \"{{ $json.ticketId }}\", \"status\": \"processed\" }",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2512,
+        592
+      ],
+      "id": "48a770c0-31c9-4c64-923b-2b1d799a0cff",
+      "name": "Respond to Webhook2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ticket Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ticket Classifier": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4eb857a7-3dd3-47b9-993f-6284e285ec74",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a16e11dea76062d35546b4bc5ccc144f6415b2db0f96624a301ae2f456b7be43"
+  },
+  "id": "YrYCPImc7isZX92m",
+  "tags": []
+}
