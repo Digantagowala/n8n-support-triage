@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 \# N8N Support Ticket Triage Automation
 
 
@@ -78,3 +79,7 @@ curl -X POST http://localhost:5678/webhook/support-ticket \\
 
 | (no match) | general | low |
 
+=======
+# n8n-support-triage
+N8N Support Inbox Triage Automation with Custom Node
+>>>>>>> 4cd6ee14ea4cb8e8d6d11d1f15f694a508d39fa7
